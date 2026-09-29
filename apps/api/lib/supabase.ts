@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
 import { env } from './env';
+import { isLocalStorageMode, localTable } from './localStore';
 
 export const SCENES_BUCKET = 'scenes';
 export const SPRITES_BUCKET = 'sprites';
@@ -19,8 +20,15 @@ export function supabase() {
   return client;
 }
 
-/** supabase().from(name) without the generated Database generic, so callers can pass plain objects. */
+/**
+ * supabase().from(name) without the generated Database generic, so callers can pass plain
+ * objects. Without SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY set, transparently swaps in an
+ * in-memory store implementing the same small chain of calls (see lib/localStore.ts).
+ */
 export function table(name: string) {
+  if (isLocalStorageMode()) {
+    return localTable(name) as any;
+  }
   return supabase().from(name) as any;
 }
 
@@ -30,6 +38,10 @@ export async function uploadImage(
   contentType: string,
   extension: string
 ): Promise<string> {
+  if (isLocalStorageMode()) {
+    return `data:${contentType};base64,${bytes.toString('base64')}`;
+  }
+
   const path = `${randomUUID()}.${extension}`;
   const { error } = await supabase().storage.from(bucket).upload(path, bytes, {
     contentType,

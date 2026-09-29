@@ -14,14 +14,26 @@ cartoonized to match — then pan and zoom around an AI-generated illustration t
 
 ## One-time setup
 
-1. **Supabase project**: create one, then run `apps/api/sql/schema.sql` in its SQL editor,
-   and create three **public** Storage buckets: `scenes`, `sprites`, `composites`.
-2. **Environment variables** for `apps/api` (copy `apps/api/.env.example` to `.env`):
-   - `OPENAI_API_KEY`
-   - `SUPABASE_URL`
-   - `SUPABASE_SERVICE_ROLE_KEY`
-3. **Install dependencies** from the repo root: `npm install` (npm workspaces link
+1. **Install dependencies** from the repo root: `npm install` (npm workspaces link
    `packages/shared` into both apps automatically).
+2. **Vercel CLI** (runs `apps/api` locally): `npm install -g vercel`. First `vercel dev`
+   run will ask you to log in and link a project — accept the defaults, nothing gets
+   deployed by running it locally.
+3. **Environment variables** — pick one:
+   - **Free/no signup — mock mode**: skip this step entirely, or copy
+     `apps/api/.env.example` to `.env` and leave it empty. Scene/sprite images become
+     instant procedural placeholders instead of real OpenAI art, and data is kept in
+     memory instead of Supabase (resets when you restart `vercel dev`). Good enough to
+     click through the whole app and check the UI/gameplay loop works.
+   - **Real AI art**: create a [Supabase](https://supabase.com) project (free tier), run
+     `apps/api/sql/schema.sql` in its SQL editor, create three **public** Storage buckets
+     (`scenes`, `sprites`, `composites`), and get an OpenAI API key (pay-per-image, no
+     free tier). Put all three in `apps/api/.env`:
+     - `OPENAI_API_KEY`
+     - `SUPABASE_URL`
+     - `SUPABASE_SERVICE_ROLE_KEY`
+   - You can also mix the two (e.g. real Supabase + no OpenAI key) — each is checked
+     independently.
 
 ## Running it
 

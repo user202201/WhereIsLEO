@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import { env } from './env';
+import { isMockImageMode, mockSceneImage, mockSpriteImage } from './mock';
 
 let client: OpenAI | undefined;
 
@@ -11,6 +12,11 @@ export function openai() {
 }
 
 export async function generateImage(prompt: string, size: '1024x1024' | '1536x1024' | '1024x1536'): Promise<Buffer> {
+  if (isMockImageMode()) {
+    const [width, height] = size.split('x').map(Number);
+    return mockSceneImage(prompt, width, height);
+  }
+
   const result = await openai().images.generate({
     model: 'gpt-image-1',
     prompt,
@@ -25,6 +31,10 @@ export async function generateImage(prompt: string, size: '1024x1024' | '1536x10
 }
 
 export async function editImage(prompt: string, imageBuffer: Buffer, filename: string): Promise<Buffer> {
+  if (isMockImageMode()) {
+    return mockSpriteImage();
+  }
+
   const file = await OpenAI.toFile(imageBuffer, filename);
   const result = await openai().images.edit({
     model: 'gpt-image-1',

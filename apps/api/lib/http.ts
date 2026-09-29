@@ -18,6 +18,10 @@ export function withErrorHandling(method: 'GET' | 'POST', handler: Handler): Han
 }
 
 export async function fetchImageBuffer(url: string): Promise<Buffer> {
+  if (url.startsWith('data:')) {
+    return Buffer.from(url.slice(url.indexOf(',') + 1), 'base64');
+  }
+
   const res = await fetch(url);
   if (!res.ok) {
     throw new Error(`Failed to fetch image from ${url}: ${res.status}`);
