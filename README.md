@@ -37,6 +37,20 @@ EXPO_PUBLIC_API_BASE_URL=http://localhost:3000 npx expo start
 Open the app in Expo Go (or a dev build — the app uses native gesture/reanimated code, so a
 full native build is needed for a release build, Expo Go works for iterating).
 
+### Fastest way to see it: run it in a browser
+
+No phone, simulator, or Expo Go needed — the app also runs on `react-native-web`:
+
+```bash
+cd apps/mobile
+EXPO_PUBLIC_API_BASE_URL=http://localhost:3000 npx expo start --web
+```
+
+This opens `http://localhost:8081` in your default browser with hot reload, same as the
+native app. The backend (`apps/api`, terminal 1 above) needs to be running too, or the
+Welcome screen's preset-character list will fail to load. On desktop, pinch-to-zoom in the
+Game screen isn't available with a mouse, so mouse-wheel / trackpad scroll zooms instead.
+
 ## Notes
 
 - Scene generation is cached per location (a rotating pool of 6) to cut cost/latency; the

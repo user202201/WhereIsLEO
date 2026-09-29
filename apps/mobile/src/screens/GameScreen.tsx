@@ -1,5 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+/* eslint-disable react-hooks/immutability -- Reanimated shared values are meant to be
+   mutated via `.value` from gesture worklets and the wheel-zoom effect below; the
+   immutability rule doesn't recognize SharedValue as an exempt mutable container. */
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Image, Platform, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
@@ -62,6 +65,31 @@ export default function GameScreen() {
     const overflowY = Math.max(0, (baseHeight * s - screenHeight) / 2);
     return { overflowX, overflowY };
   }
+
+  // Pinch gestures need a touchscreen; on a desktop browser the only way to zoom is the
+  // mouse wheel / trackpad scroll, so wire that up directly to the same shared values.
+  const containerRef = useRef<View>(null);
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    const node = containerRef.current as unknown as HTMLElement | null;
+    if (!node) return;
+
+    function onWheel(e: WheelEvent) {
+      e.preventDefault();
+      const next = clampWorklet(savedScale.value * (1 - e.deltaY * 0.0015), MIN_SCALE, MAX_SCALE);
+      scale.value = next;
+      savedScale.value = next;
+      const { overflowX, overflowY } = boundsFor(next);
+      translateX.value = clampWorklet(translateX.value, -overflowX, overflowX);
+      translateY.value = clampWorklet(translateY.value, -overflowY, overflowY);
+      savedTranslateX.value = translateX.value;
+      savedTranslateY.value = translateY.value;
+    }
+
+    node.addEventListener('wheel', onWheel, { passive: false });
+    return () => node.removeEventListener('wheel', onWheel);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [baseWidth, baseHeight, screenWidth, screenHeight]);
 
   function handleTap(localX: number, localY: number) {
     if (!game || finished || guessing) return;
@@ -140,7 +168,7 @@ export default function GameScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View ref={containerRef} style={styles.container}>
       <GestureDetector gesture={composed}>
         <Animated.View style={[{ width: baseWidth, height: baseHeight }, animatedStyle]}>
           <Image source={{ uri: game.compositeImageUrl }} style={StyleSheet.absoluteFill} resizeMode="stretch" />
