@@ -10,5 +10,5 @@
     "resolveJsonModule": true,
     "noEmit": true
   },
-  "include": ["api", "lib"]
+  "include": ["api", "lib", "dev-server.ts"]
 }

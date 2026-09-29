@@ -16,14 +16,11 @@ cartoonized to match — then pan and zoom around an AI-generated illustration t
 
 1. **Install dependencies** from the repo root: `npm install` (npm workspaces link
    `packages/shared` into both apps automatically).
-2. **Vercel CLI** (runs `apps/api` locally): `npm install -g vercel`. First `vercel dev`
-   run will ask you to log in and link a project — accept the defaults, nothing gets
-   deployed by running it locally.
-3. **Environment variables** — pick one:
+2. **Environment variables** — pick one:
    - **Free/no signup — mock mode**: skip this step entirely, or copy
      `apps/api/.env.example` to `.env` and leave it empty. Scene/sprite images become
      instant procedural placeholders instead of real OpenAI art, and data is kept in
-     memory instead of Supabase (resets when you restart `vercel dev`). Good enough to
+     memory instead of Supabase (resets when you restart the dev server). Good enough to
      click through the whole app and check the UI/gameplay loop works.
    - **Real AI art**: create a [Supabase](https://supabase.com) project (free tier), run
      `apps/api/sql/schema.sql` in its SQL editor, create three **public** Storage buckets
@@ -39,12 +36,18 @@ cartoonized to match — then pan and zoom around an AI-generated illustration t
 
 ```bash
 # Terminal 1 — backend
-cd apps/api && npm run dev   # vercel dev
+cd apps/api && npm run dev
 
 # Terminal 2 — mobile app
 cd apps/mobile
 EXPO_PUBLIC_API_BASE_URL=http://localhost:3000 npx expo start
 ```
+
+`apps/api`'s `npm run dev` starts a plain local Node server on port 3000 (`dev-server.ts`)
+that calls the exact same handler code Vercel would run in production — no Vercel CLI,
+account, or network access needed. If you specifically want to test against the real
+Vercel CLI runtime before deploying, `npm run dev:vercel` runs `vercel dev` instead (needs
+`npm install -g vercel` and a one-time login).
 
 Open the app in Expo Go (or a dev build — the app uses native gesture/reanimated code, so a
 full native build is needed for a release build, Expo Go works for iterating).

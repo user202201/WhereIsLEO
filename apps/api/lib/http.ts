@@ -4,6 +4,17 @@ type Handler = (req: VercelRequest, res: VercelResponse) => Promise<void>;
 
 export function withErrorHandling(method: 'GET' | 'POST', handler: Handler): Handler {
   return async (req, res) => {
+    // The web build of the mobile app runs on a different origin/port than this API
+    // (e.g. localhost:8081 vs localhost:3000), so browser requests need CORS headers.
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    if (req.method === 'OPTIONS') {
+      res.status(204).end();
+      return;
+    }
+
     if (req.method !== method) {
       res.status(405).json({ error: `Method not allowed, expected ${method}` });
       return;
