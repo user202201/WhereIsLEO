@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/scenes/*.ts": { "maxDuration": 90 },
+    "api/targets/*.ts": { "maxDuration": 90 },
+    "api/games/*.ts": { "maxDuration": 30 }
+  }
+}

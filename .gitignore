@@ -1,0 +1,15 @@
+node_modules/
+.env
+.env.local
+*.log
+
+# Expo
+apps/mobile/.expo/
+apps/mobile/dist/
+apps/mobile/web-build/
+
+# Vercel
+apps/api/.vercel/
+
+# macOS
+.DS_Store
